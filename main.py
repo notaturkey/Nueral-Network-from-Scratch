@@ -8,8 +8,7 @@ signal_const = 1
 bias1 = 0.5
 bias2 = 0.75
 alpha = 0.2
-trainHard = 100
-
+trainHard = 1000
 
 ##sigmoids 
 def bipolarSigmoid(x):
@@ -17,9 +16,6 @@ def bipolarSigmoid(x):
 
 def bipolarSigmoidx(x):
     return 0.5*((1+bipolarSigmoid(x))*(1-bipolarSigmoid(x)) )
-
-
-
 
 ##node object for net
 class Node():
@@ -35,19 +31,7 @@ class Node():
         self.bias2 = bias2
         self.deltabias1 = 0
         self.deltabias2 = 0
-
-    def setSignal(self,sig):
-        self.signal = sig
-
-    def setWeight(self,wt):
-        self.weight = wt
-
-    def setPrevNode(self,prev):
-        self.prevNode.append(prev)
-
-    def setNextNode(self,nex):
-        self.nextNode.append(nex)
-
+    
 class Net():
     def __init__(self):
         self.net = []
@@ -152,29 +136,59 @@ class Net():
 
         for i in self.net[2]:
             i.bias2 = i.bias2 + i.deltabias2
-    
-
-                
-
-
-
-            
-            
-
-
 
 netw = Net()
 netw.buildNet()
 f = open('HW3_Training.txt', 'r')
-##train
-for q in range(trainHard):
-    target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
+
+def train(netw):
+    ##train
+    for q in range(trainHard):
+        target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
+        ##process
+        letter = 0
+        count= 0 
+        chars = []
+        for line in f:
+            line = line.rstrip()
+            if count < 8:
+                for i in line:
+                    chars.append(i)
+                count = count +1
+            else:
+                ##feed
+                netw.feed(chars)
+                if letter < 7:
+                    netw.backProp(target[letter])
+                    letter = letter + 1
+                else:
+                    letter = 0
+                    netw.backProp(target[letter])
+                    letter = letter + 1
+                ##continue
+                chars = []
+                count = 0
+        f.seek(0)
+        q = q+1
+
+f.close()
+
+##test
+f = open('HW3_Testing.txt', 'r')
+avgTotal = 0
+for runs in range(10):
+    netw = Net()
+    netw.buildNet()
+    train(netw)
     ##process
     letter = 0
     count= 0 
     chars = []
+    numRight = 0
+    total = 0
     for line in f:
         line = line.rstrip()
+        print(line)
         if count < 8:
             for i in line:
                 chars.append(i)
@@ -182,75 +196,15 @@ for q in range(trainHard):
         else:
             ##feed
             netw.feed(chars)
-            if letter < 7:
-                netw.backProp(target[letter])
-                letter = letter + 1
-            else:
-                letter = 0
-                netw.backProp(target[letter])
-                letter = letter + 1
-            ##continue
-            chars = []
-            count = 0
-    
-    f.seek(0)
-    q = q+1
-
-f.close()
-
-##test
-f = open('HW3_Testing.txt', 'r')
-target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
-##process
-letter = 0
-count= 0 
-chars = []
-numRight = 0
-total = 0
-for line in f:
-    line = line.rstrip()
-    print(line)
-    if count < 8:
-        for i in line:
-            chars.append(i)
-        count = count +1
-    else:
-        ##feed
-        netw.feed(chars)
-        temp = copy.deepcopy(netw.net[2])
-        print('---------------------------')
-        print("for letter " + str(letter)+ ":")
-        final = []
-        count  = 0
-        for i in temp:
-            final.append([i.signal,count])
-            count = count+1
-        temp = sorted(final).pop()
-        print(temp)
-        asc = temp[1]
-        if asc == 0:
-            asc = 'A'
-        elif asc == 1:
-            asc = 'B'
-        elif asc == 2:
-            asc = 'C'
-        elif asc == 3:
-            asc = 'D'
-        elif asc == 4:
-            asc = 'E'
-        elif asc == 5:
-            asc = 'J'
-        elif asc == 6:
-            asc = 'K'
-        print("Computer guessed: " + asc)
-        ##continue
-        if letter == temp[1]:
-            numRight = numRight + 1
-        else:
-            print('Result was wrong, computers second choice:')
-            temp = sorted(final)
-            temp.pop()
-            temp = temp.pop()
+            temp = copy.deepcopy(netw.net[2])
+            print('---------------------------')
+            print("for letter " + str(letter)+ ":")
+            final = []
+            count  = 0
+            for i in temp:
+                final.append([i.signal,count])
+                count = count+1
+            temp = sorted(final).pop()
             print(temp)
             asc = temp[1]
             if asc == 0:
@@ -268,13 +222,44 @@ for line in f:
             elif asc == 6:
                 asc = 'K'
             print("Computer guessed: " + asc)
-        print('---------------------------')
-        chars = []
-        count = 0
-        if letter < 6:
-            letter = letter +1
-        else:
-            letter = 0
-        total = total + 1
+            ##continue
+            if letter == temp[1]:
+                numRight = numRight + 1
+            else:
+                print('Result was wrong, computers second choice:')
+                temp = sorted(final)
+                temp.pop()
+                temp = temp.pop()
+                print(temp)
+                asc = temp[1]
+                if asc == 0:
+                    asc = 'A'
+                elif asc == 1:
+                    asc = 'B'
+                elif asc == 2:
+                    asc = 'C'
+                elif asc == 3:
+                    asc = 'D'
+                elif asc == 4:
+                    asc = 'E'
+                elif asc == 5:
+                    asc = 'J'
+                elif asc == 6:
+                    asc = 'K'
+                print("Computer guessed: " + asc)
+            print('---------------------------')
+            chars = []
+            count = 0
+            if letter < 6:
+                letter = letter +1
+            else:
+                letter = 0
+            total = total + 1
+    print("accuracy:" + str((numRight/total)*100))
+    avgTotal = avgTotal+ (numRight/total)*100
+    f.seek(0)
+    runs = runs + 1
+print("Average accuracy:")
+print(avgTotal/10)
 
-print("accuracy:" + str((numRight/total)*100))
+f.close()
