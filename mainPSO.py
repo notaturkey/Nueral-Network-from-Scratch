@@ -6,7 +6,7 @@ inner_nodes = 15
 output_nodes = 7
 
 particles_const = 20
-epochs = 200
+epochs = 100
 c1 = 0.6
 c2 = 1.95
 w = 0.00051231
