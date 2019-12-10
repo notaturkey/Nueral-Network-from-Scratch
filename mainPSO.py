@@ -2,15 +2,14 @@ import random
 import copy
 import math
 
-inner_nodes = 50
+inner_nodes = 15
 output_nodes = 7
 
-particles_const = 100
+particles_const = 20
 epochs = 200
-c1 = 0.35
-c2 = 1.75
-w = 0.6
-bias_range = 5
+c1 = 0.6
+c2 = 1.95
+w = 0.00051231
 min_velocity = -10
 max_velocity = 10
 
@@ -26,46 +25,37 @@ class Swarm():
         self.gbest = []
 
     def update(self):
-        scores = []
         for part in self.particles:
-            scores.append([part.score, part])
-                
-        scores = sorted(scores, key=lambda score: score[0])
+            if part.score > self.gbestScore:
+                self.gbestScore = part.score
+                self.gbest = part.pos
+            if part.score > part.pbestScore:
+                part.pbestScore = part.score
+                part.pbest = part.pos 
 
-        #check and update scores
-        for i in scores:
-            if i[0] > self.gbestScore:
-                self.gbestScore = i[0]
-                self.gbest = i[1].velocity
-            if i[0] > i[1].pbestScore:
-                i[1].pbestScore = i[0]
-                i[1].pbest = i[1].velocity 
-
-        
-        #next velocity for particle
-        for part in self.particles:
-            index = 0
             part.nxtVelocity = []
-            for i in part.velocity:
-                temp = (w*i) + (c1*random.random()*(part.pbest[index] - i))
-                temp = temp + (c2*random.random()*(self.gbest[index] - i))
-                index = index + 1
-                part.nxtVelocity.append(temp)
+            for i in range(len(part.velocity)):
+                temp = (w*part.velocity[i]) + (c1*random.uniform(-1,1)*(part.pbest[i] - part.pos[i]))
+                temp = temp + (c2*random.uniform(-1,1)*(self.gbest[i] - part.pos[i]))
+                if temp > max_velocity:
+                    temp = max_velocity
+                    part.nxtVelocity.append(temp)
+                elif temp < min_velocity:
+                    temp = min_velocity
+                    part.nxtVelocity.append(temp)
+                else:
+                    part.nxtVelocity.append(temp)
+                
 
-
-            #make sure its not past max or min velocity
-            ind = 0
-            newState = []
-            for n in part.nxtVelocity:
-                if n>max_velocity:
-                    n = max_velocity
-                elif n<min_velocity:
-                    n= min_velocity
-                ind = ind +1
-                newState.append(n)
-            
             #update velocity
-            part.velocity = newState
+            for i in range(len(part.velocity)):
+                    if part.pos[i]+ part.nxtVelocity[i] > 3:
+                        part.pos[i] = 3
+                    elif part.pos[i]+ part.nxtVelocity[i] < -3:
+                        part.pos[i] = -3
+                    else:
+                        part.pos[i] = part.pos[i]+ part.nxtVelocity[i]
+ 
 
 
     
@@ -74,20 +64,32 @@ class Swarm():
 class Particle():
     def __init__ (self):
         self.score = 0
+        self.pos = self.initPos()
         self.nxtVelocity = []
         self.velocity = self.initVel()
         self.pbest = self.velocity
         self.pbestScore = -1000
 
+    def initPos(self):
+        temp = (63*inner_nodes) + (inner_nodes*output_nodes)
+        arr = []
+        for i in range(temp):
+            arr.append(random.uniform(-2,2))
+        
+        ##biases
+        arr.append(10)
+        arr.append(5)
+        return arr
+    
     def initVel(self):
         temp = (63*inner_nodes) + (inner_nodes*output_nodes)
         arr = []
         for i in range(temp):
-            arr.append(random.uniform(-1,1))
+            arr.append(random.uniform(min_velocity,max_velocity))
         
         ##biases
-        arr.append(random.uniform(-1*bias_range,1*bias_range))
-        arr.append(random.uniform(-1*bias_range,1*bias_range))
+        arr.append(random.uniform(-1,1))
+        arr.append(random.uniform(-1,1))
         return arr
     
 
@@ -138,11 +140,11 @@ class Net():
         weights = []
         ##getting right weights from particle
         for j in self.net[0]:
-            k = particle.velocity[(inner_nodes*temp):(inner_nodes*(temp+1))]
+            k = particle.pos[(inner_nodes*temp):(inner_nodes*(temp+1))]
             weights.append(k)
             temp = temp+1
         
-        tempArr = particle.velocity[63*inner_nodes:]
+        tempArr = particle.pos[63*inner_nodes:]
         arr = []
         temp = 0
         for j in self.net[1]:
@@ -158,7 +160,7 @@ class Net():
             for j in self.net[0]:
                 sum = sum + (j.signal*weights[temp][count])
                 temp = temp+1
-            sum = particle.velocity[-2] + sum
+            sum = particle.pos[-2] + sum
             i.signal = bipolarSigmoid(sum)
             count = count + 1
 
@@ -170,7 +172,7 @@ class Net():
             for j in self.net[1]:
                 sum = sum + (j.signal*arr[temp][count])
                 temp = temp+1
-            sum = particle.velocity[-1] + sum
+            sum = particle.pos[-1] + sum
             i.signal = bipolarSigmoid(sum)
             count = count + 1
 
@@ -260,7 +262,7 @@ for runs in range(10):
 
     print('Testing with global best performing particle')
     bestParticle = Particle()
-    bestParticle.velocity = swarm.gbest
+    bestParticle.pos = swarm.gbest
     ##process
     letter = 0
     count= 0 
