@@ -8,7 +8,7 @@ signal_const = 1
 bias1 = 0.5
 bias2 = 0.75
 alpha = 0.2
-trainHard = 1000
+trainHard = 100
 
 ##sigmoids 
 def bipolarSigmoid(x):
@@ -20,8 +20,6 @@ def bipolarSigmoidx(x):
 ##node object for net
 class Node():
     def __init__ (self):
-        self.prevNode = []
-        self.nextNode = []
         self.signal = 0
         self.weight = []
         self.error = 0
