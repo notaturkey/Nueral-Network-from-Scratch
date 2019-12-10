@@ -2,16 +2,17 @@ import random
 import copy
 import math
 
-inner_nodes = 30
+inner_nodes = 50
 output_nodes = 7
 
-particles_const = 10
-epochs = 10
-c1 = 0.98
-c2 = 0.60
-w = 0.3
-min_velocity = -100
-max_velocity = 100
+particles_const = 100
+epochs = 200
+c1 = 0.35
+c2 = 1.75
+w = 0.6
+bias_range = 5
+min_velocity = -10
+max_velocity = 10
 
 ##sigmoids 
 def bipolarSigmoid(x):
@@ -28,9 +29,10 @@ class Swarm():
         scores = []
         for part in self.particles:
             scores.append([part.score, part])
-        
+                
         scores = sorted(scores, key=lambda score: score[0])
 
+        #check and update scores
         for i in scores:
             if i[0] > self.gbestScore:
                 self.gbestScore = i[0]
@@ -40,6 +42,7 @@ class Swarm():
                 i[1].pbest = i[1].velocity 
 
         
+        #next velocity for particle
         for part in self.particles:
             index = 0
             part.nxtVelocity = []
@@ -49,6 +52,8 @@ class Swarm():
                 index = index + 1
                 part.nxtVelocity.append(temp)
 
+
+            #make sure its not past max or min velocity
             ind = 0
             newState = []
             for n in part.nxtVelocity:
@@ -59,6 +64,7 @@ class Swarm():
                 ind = ind +1
                 newState.append(n)
             
+            #update velocity
             part.velocity = newState
 
 
@@ -72,7 +78,6 @@ class Particle():
         self.velocity = self.initVel()
         self.pbest = self.velocity
         self.pbestScore = -1000
-        self.gbest = []
 
     def initVel(self):
         temp = (63*inner_nodes) + (inner_nodes*output_nodes)
@@ -81,15 +86,9 @@ class Particle():
             arr.append(random.uniform(-1,1))
         
         ##biases
-        arr.append(random.uniform(-1,1))
-        arr.append(random.uniform(-1,1))
+        arr.append(random.uniform(-1*bias_range,1*bias_range))
+        arr.append(random.uniform(-1*bias_range,1*bias_range))
         return arr
-    
-    def checkScore(self, result,target):
-        score = 0
-        for i in range(len(result)):
-            score = score + (target[i] - result[i].signal)    
-        self.score = abs(score)
     
 
 ##node object for net
@@ -176,18 +175,10 @@ class Net():
             count = count + 1
 
 
-netw = Net()
-netw.buildNet()
-f = open('HW3_Training.txt', 'r')
 target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
-particles = []
-for i in range(particles_const):
-        part = Particle()
-        particles.append(part)
-
-swarm = Swarm(particles)
 def train(netw,swarm):
-    for i in range(100):
+    f = open('HW3_Training.txt', 'r')
+    for i in range(epochs):
         for part in swarm.particles:
             part.score = 0
         ##process
@@ -242,26 +233,34 @@ def train(netw,swarm):
         swarm.update()
 
         f.seek(0)
+    f.close()
 
-print('swarming particles, may take a bit')
-train(netw,swarm)
-f.close()
 
-print('particle scores from final run:')
-for i in swarm.particles:
-    print(str(i.score/21) + " percent accurate")
-
-print('global best accuracy: '+str(swarm.gbestScore/21))
-
-print('Testing with global best performing particle')
-bestParticle = Particle()
-bestParticle.velocity = swarm.gbest
 ##test
 f = open('HW3_Testing.txt', 'r')
 avgTotal = 0 
 for runs in range(10):
+    particles = []
+    for i in range(particles_const):
+        part = Particle()
+        particles.append(part)
+
+    swarm = Swarm(particles)
     netw = Net()
     netw.buildNet()
+    print('swarming particles, may take a bit depending on # of epochs')
+    train(netw,swarm)
+
+
+    print('particle scores from final run:')
+    for i in swarm.particles:
+        print(str(i.score/21) + " percent accurate")
+
+    print('global best accuracy: '+str(swarm.gbestScore/21))
+
+    print('Testing with global best performing particle')
+    bestParticle = Particle()
+    bestParticle.velocity = swarm.gbest
     ##process
     letter = 0
     count= 0 
@@ -277,7 +276,7 @@ for runs in range(10):
             count = count +1
         else:
             ##feed
-            netw.feed(chars)
+            netw.feed(chars, bestParticle)
             temp = copy.deepcopy(netw.net[2])
             print('---------------------------')
             print("for letter " + str(letter)+ ":")
@@ -343,5 +342,4 @@ for runs in range(10):
     runs = runs + 1
 print("Average accuracy:")
 print(avgTotal/10)
-
 f.close()
