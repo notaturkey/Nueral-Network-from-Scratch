@@ -116,6 +116,7 @@ Changing the bias here doesn't show anything that really correlates here as well
 
 ##### Changing the Epochs
 |# of Epochs | Avg. Accuracy|
+| --- | --- |
 |50 | 84.28571428571429|
 |100 | 87.14285714285712|
 |200 | 92.85714285714285|
