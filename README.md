@@ -1,4 +1,10 @@
 # Nueral Network From Scratch
+## Run
+```
+python3 main.py
+```
+
+## Description
 This is my implementation of creating a multilayer nueral net that trains using backpropogation from scratch using python.
 
 The goal is to create a nueral net that can identify letters correctly. To do this we had to create a multilayered nueral net that trains with backpropogation. The architecture of my net has 62 input nodes, an initial value of 30 hidden nodes, and 7 output nodes. I chose 62 input nodes to represent each pixel in our 7x9 letter like the one shown below.
