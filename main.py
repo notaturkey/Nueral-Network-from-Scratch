@@ -10,7 +10,7 @@ bias2 = 0.75
 alpha = 0.2
 trainHard = 100
 
-##sigmoids 
+##sigmoids
 def bipolarSigmoid(x):
     return (2 / (1 + math.exp(-1*x ))) - 1
 
@@ -29,7 +29,7 @@ class Node():
         self.bias2 = bias2
         self.deltabias1 = 0
         self.deltabias2 = 0
-    
+
 class Net():
     def __init__(self):
         self.net = []
@@ -39,7 +39,7 @@ class Net():
         for i in range(output_nodes):
             node = Node()
             outputNodes.append(node)
-    
+
         ##median layer
         medianNodes = []
         for i in range(inner_nodes):
@@ -56,11 +56,11 @@ class Net():
             for j in medianNodes:
                 node.weight.append(random.uniform(-1,1))
             inputNodes.append(node)
-        
+
         self.net.append(inputNodes)
         self.net.append(medianNodes)
         self.net.append(outputNodes)
-    
+
     def feed(self, chars):
         count = 0
         for i in chars:
@@ -93,7 +93,7 @@ class Net():
             i.y_in = i.bias2 + sum
             i.signal = bipolarSigmoid(i.y_in)
             count = count+1
-    
+
     def backProp(self, vector):
         count = 0
         for i in self.net[2]:
@@ -117,14 +117,14 @@ class Net():
 
 
         self.updateNet()
-    
+
     def updateNet(self):
         for i in self.net[0]:
             count = 0
             for j in i.weight:
                 i.weight[count] = j + (i.deltaWeight.pop(0))
                 count = count+1
-            
+
         for i in self.net[1]:
             count = 0
             for j in i.weight:
@@ -137,15 +137,15 @@ class Net():
 
 netw = Net()
 netw.buildNet()
-f = open('HW3_Training.txt', 'r')
+f = open('TrainData.txt', 'r')
 
 def train(netw):
     ##train
     for q in range(trainHard):
-        target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
+        target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]]
         ##process
         letter = 0
-        count= 0 
+        count= 0
         chars = []
         for line in f:
             line = line.rstrip()
@@ -172,7 +172,7 @@ def train(netw):
 f.close()
 
 ##test
-f = open('HW3_Testing.txt', 'r')
+f = open('TestData.txt', 'r')
 avgTotal = 0
 for runs in range(10):
     netw = Net()
@@ -180,7 +180,7 @@ for runs in range(10):
     train(netw)
     ##process
     letter = 0
-    count= 0 
+    count= 0
     chars = []
     numRight = 0
     total = 0

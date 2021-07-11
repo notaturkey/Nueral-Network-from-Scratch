@@ -13,7 +13,7 @@ w = 0.00051231
 min_velocity = -10
 max_velocity = 10
 
-##sigmoids 
+##sigmoids
 def bipolarSigmoid(x):
     return (2 / (1 + math.exp(-1*x ))) - 1
 
@@ -31,7 +31,7 @@ class Swarm():
                 self.gbest = part.pos
             if part.score > part.pbestScore:
                 part.pbestScore = part.score
-                part.pbest = part.pos 
+                part.pbest = part.pos
 
             part.nxtVelocity = []
             for i in range(len(part.velocity)):
@@ -45,7 +45,7 @@ class Swarm():
                     part.nxtVelocity.append(temp)
                 else:
                     part.nxtVelocity.append(temp)
-                
+
 
             #update velocity
             for i in range(len(part.velocity)):
@@ -55,10 +55,10 @@ class Swarm():
                         part.pos[i] = -3
                     else:
                         part.pos[i] = part.pos[i]+ part.nxtVelocity[i]
- 
 
 
-    
+
+
 
 ##particle for pso
 class Particle():
@@ -75,29 +75,29 @@ class Particle():
         arr = []
         for i in range(temp):
             arr.append(random.uniform(-2,2))
-        
+
         ##biases
         arr.append(10)
         arr.append(5)
         return arr
-    
+
     def initVel(self):
         temp = (63*inner_nodes) + (inner_nodes*output_nodes)
         arr = []
         for i in range(temp):
             arr.append(random.uniform(min_velocity,max_velocity))
-        
+
         ##biases
         arr.append(random.uniform(-1,1))
         arr.append(random.uniform(-1,1))
         return arr
-    
+
 
 ##node object for net
 class Node():
     def __init__ (self):
         self.signal = 0
-        
+
 class Net():
     def __init__(self):
         self.net = []
@@ -107,7 +107,7 @@ class Net():
         for i in range(output_nodes):
             node = Node()
             outputNodes.append(node)
-    
+
         ##median layer
         medianNodes = []
         for i in range(inner_nodes):
@@ -119,11 +119,11 @@ class Net():
         for i in range(63):
             node = Node()
             inputNodes.append(node)
-        
+
         self.net.append(inputNodes)
         self.net.append(medianNodes)
         self.net.append(outputNodes)
-    
+
     def feed(self, chars, particle):
         count = 0
         for i in chars:
@@ -143,7 +143,7 @@ class Net():
             k = particle.pos[(inner_nodes*temp):(inner_nodes*(temp+1))]
             weights.append(k)
             temp = temp+1
-        
+
         tempArr = particle.pos[63*inner_nodes:]
         arr = []
         temp = 0
@@ -177,15 +177,15 @@ class Net():
             count = count + 1
 
 
-target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]] 
+target = [[1,-1,-1,-1,-1, -1, -1],[-1,1,-1,-1,-1, -1, -1],[-1,-1, 1,-1,-1, -1, -1],[-1,-1,-1, 1,-1, -1, -1],[-1,-1,-1,-1, 1, -1, -1],[-1,-1,-1,-1,-1, 1, -1],[-1,-1,-1,-1,-1, -1, 1]]
 def train(netw,swarm):
-    f = open('HW3_Training.txt', 'r')
+    f = open('TrainData.txt', 'r')
     for i in range(epochs):
         for part in swarm.particles:
             part.score = 0
         ##process
         letter = 0
-        count= 0 
+        count= 0
         chars = []
         for line in f:
             line = line.rstrip()
@@ -209,7 +209,7 @@ def train(netw,swarm):
                         asc = temp[1]
                         if asc == letter:
                             part.score = part.score+1
-                        
+
                     letter = letter + 1
                 else:
                     letter = 0
@@ -226,7 +226,7 @@ def train(netw,swarm):
                         asc = temp[1]
                         if asc == letter:
                             part.score = part.score+1
-            
+
                     letter = letter + 1
                 ##continue
                 chars = []
@@ -239,8 +239,8 @@ def train(netw,swarm):
 
 
 ##test
-f = open('HW3_Testing.txt', 'r')
-avgTotal = 0 
+f = open('TestData.txt', 'r')
+avgTotal = 0
 for runs in range(10):
     particles = []
     for i in range(particles_const):
@@ -265,7 +265,7 @@ for runs in range(10):
     bestParticle.pos = swarm.gbest
     ##process
     letter = 0
-    count= 0 
+    count= 0
     chars = []
     numRight = 0
     total = 0
