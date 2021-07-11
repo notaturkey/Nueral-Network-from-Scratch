@@ -38,7 +38,7 @@ trainHard = 100
 ```
 The overall process of my program goes as followed:
 
-##Train
+## Train
 1. Collect the pixels from a letter and feed it to the input layer of the net
 2. The net continues to feed through each layer giving a node a signal till it gets to the output layer
 3. The net is given a target vector that represents the letter the net should have guessed and each node in the output layer calculates its error
@@ -48,14 +48,14 @@ The overall process of my program goes as followed:
 7. all weights and biases are adjusted based off the deltaweights and deltabiases
 8. repeat 1-7 till there is no more letters to train from  
 
-##Test
+## Test
 1. Collect the pixels from a letter and feed it to the input layer of the net
 2. The net continues to feed through each layer giving a node a signal till it gets to the output layer
 3. Retreive the output layer array and sort the signals in an descending order
 4. The largest value represents the nueral net's best guess
 5. Repeat 1-4 till there is no more letters to test
 
-###section{Experiments}
+### Experiments
 As a base test, I used the following constants:
 ```
 inner_nodes = 30
@@ -70,7 +70,7 @@ There's nothing special about these values other than this was the setup when my
 
 Running the test with the initial constants I set, I was given an average accuracy of 87.14285714285712 which Isnt bad for disregarding the optimization of my net. With the tables below, you can see how the accuracy changes when changing the constants.
 
-####Changing the Number of Hidden Nodes
+#### Changing the Number of Hidden Nodes
 
 |# of Hidden Nodes | Avg. Accuracy|
 | --- | --- |
@@ -84,7 +84,7 @@ Running the test with the initial constants I set, I was given an average accura
 
 you can see the lower range number of hidden nodes around 20 has the best accuracy and anything above or below that the accuracy of the net starts to decline.
 
-####Changing the Initial Bias of the Hidden Layer
+#### Changing the Initial Bias of the Hidden Layer
 |Bias Value | Avg. Accuracy|
 | --- | --- |
 |-3 | 95.23809523809523|
@@ -99,7 +99,7 @@ you can see the lower range number of hidden nodes around 20 has the best accura
 
 Seems like the bias changing doesn't have that much of an effect of the net's accuracy  
 
-####Changing the Initial Bias of the Output Layer
+#### Changing the Initial Bias of the Output Layer
 |Bias Value | Avg. Accuracy|
 | --- | --- |
 |-3 | 95.23809523809537|
@@ -114,7 +114,7 @@ Seems like the bias changing doesn't have that much of an effect of the net's ac
 
 Changing the bias here doesn't show anything that really correlates here as well.
 
-#####Changing the Epochs
+##### Changing the Epochs
 |# of Epochs | Avg. Accuracy|
 |50 | 84.28571428571429|
 |100 | 87.14285714285712|
